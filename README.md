@@ -1,4 +1,5 @@
 ## Presotea SS2 Database Management System
+This is the assignment for WIA2001 Database.
 
 ### Overview
 Presotea is a renowned Taiwanese brand specializing in tea beverages, with over 370 franchises globally. Our group has chosen Presotea located in SS2, Petaling Jaya, as our project collaborator to enhance their database management system (DBMS). 
