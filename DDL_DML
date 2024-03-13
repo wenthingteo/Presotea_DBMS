@@ -1,0 +1,644 @@
+--DATA DEFINITION LANGUAGE--
+CREATE TABLE Customer (
+Customer_ID INTEGER NOT NULL,
+Customer_Name VARCHAR(50) NOT NULL,
+Customer_Contact VARCHAR(15) NOT NULL,
+Customer_Email VARCHAR(30) NOT NULL,
+PRIMARY KEY(Customer_ID)
+);
+
+CREATE TABLE Employee_Position (
+Employee_Position_ID VARCHAR(4) NOT NULL,
+Employee_Position_Name VARCHAR(50) NOT NULL,
+Employee_Pay_Rate NUMBER NOT NULL,
+PRIMARY KEY(Employee_Position_ID)
+);
+
+CREATE TABLE Beverage (
+Bvg_ID VARCHAR(4) NOT NULL,
+Bvg_Name VARCHAR(50) NOT NULL,
+Selling_Price NUMBER NOT NULL,
+Bvg_Type VARCHAR(20) NOT NULL,
+PRIMARY KEY(Bvg_ID)
+);
+
+CREATE TABLE Supplier (
+Supplier_ID VARCHAR(4) NOT NULL,
+Supplier_Name VARCHAR(50) NOT NULL,
+Supplier_Contact INTEGER NOT NULL,
+Supplier_Email VARCHAR(30) NOT NULL,
+Supplier_Address VARCHAR(320) NOT NULL,
+PRIMARY KEY(Supplier_ID)
+);
+
+CREATE TABLE Employee (
+Employee_ID VARCHAR(4) NOT NULL,
+Employee_Name VARCHAR(50) NOT NULL,
+Employee_NRIC VARCHAR(20) NOT NULL,
+Employee_BankDetails VARCHAR(20) NOT NULL,
+Employee_Contact VARCHAR(15) NOT NULL,
+Employee_Gender CHAR(6) NOT NULL,
+Employee_Hire_Date DATE NOT NULL,
+Employee_Position_ID VARCHAR(4) NOT NULL,
+Employee_Working_Hours INTEGER NOT NULL,
+PRIMARY KEY(Employee_ID)
+);
+
+CREATE TABLE Employee_Attendance (
+Attendance_ID VARCHAR(4) NOT NULL,
+Attendance_Date DATE NOT NULL,
+Employee_ID VARCHAR(4) NOT NULL,
+Clock_In_Time TIMESTAMP NOT NULL,
+Clock_Out_Time TIMESTAMP NOT NULL,
+Attendance_Status VARCHAR(10) NOT NULL,
+PRIMARY KEY(Attendance_ID),
+CONSTRAINT FK_Employee_Attendance FOREIGN KEY (Employee_ID)
+REFERENCES Employee(Employee_ID)
+);
+
+CREATE TABLE Shift_Schedule (
+Shift_ID VARCHAR(4) NOT NULL,
+Employee_ID VARCHAR(4) NOT NULL,
+Shift_Date DATE NOT NULL,
+Shift_Start_Time TIMESTAMP NOT NULL,
+Shift_End_Time TIMESTAMP NOT NULL,
+Shift_Type VARCHAR(50) NOT NULL,
+PRIMARY KEY(Shift_ID),
+CONSTRAINT FK_Shift_Schedule FOREIGN KEY(Employee_ID)
+REFERENCES Employee(Employee_ID)
+);
+
+CREATE TABLE Orders (
+Order_ID INTEGER NOT NULL,
+Employee_ID VARCHAR(4) NOT NULL,
+Customer_ID INTEGER,
+Order_Date_Time TIMESTAMP NOT NULL,
+Delivery_ID VARCHAR(10),
+Payment_Method_Name VARCHAR(20) NOT NULL,
+Payment_Amount NUMBER NOT NULL,
+PRIMARY KEY(Order_ID),
+CONSTRAINT FK_Order_Employee_ID FOREIGN KEY(Employee_ID) REFERENCES Employee(Employee_ID),
+CONSTRAINT FK_Order_Customer_ID FOREIGN KEY(Customer_ID) REFERENCES Customer(Customer_ID)
+);
+
+CREATE TABLE Ingredient (
+Ingredient_ID VARCHAR(5) NOT NULL,
+Ingredient_Name VARCHAR(50) NOT NULL,
+Supplier_ID VARCHAR(4) NOT NULL,
+Unit_Cost NUMBER NOT NULL,
+Ingredient_Category VARCHAR(50) NOT NULL,
+PRIMARY KEY(Ingredient_ID),
+CONSTRAINT FK_Ingredient FOREIGN KEY(Supplier_ID) REFERENCES Supplier(Supplier_ID)
+);
+
+CREATE TABLE Inventory (
+Inventory_ID VARCHAR(5) NOT NULL,
+Ingredient_ID VARCHAR(5) NOT NULL,
+Date_Created DATE NOT NULL,
+Expiration_Date DATE NOT NULL,
+Ingredient_Quantity INTEGER NOT NULL CHECK (Ingredient_Quantity > 0),
+PRIMARY KEY(Inventory_ID),
+CONSTRAINT FK_Inventory FOREIGN KEY(Ingredient_ID)
+REFERENCES Ingredient(Ingredient_ID)
+);
+
+CREATE TABLE Made (
+Ingredient_ID VARCHAR(5) NOT NULL,
+Bvg_ID VARCHAR(4) NOT NULL,
+PRIMARY KEY(Ingredient_ID, Bvg_ID),
+CONSTRAINT FK_Made_Ingredient_ID FOREIGN KEY(Ingredient_ID) REFERENCES Ingredient(Ingredient_ID),
+CONSTRAINT FK_Made_Bvg_ID FOREIGN KEY(Bvg_ID) REFERENCES Beverage(Bvg_ID)
+);
+
+CREATE TABLE Includes(
+Order_ID INTEGER NOT NULL,
+Bvg_ID VARCHAR(4) NOT NULL,
+Bvg_Quantity INTEGER NOT NULL CHECK (Bvg_Quantity > 0),
+PRIMARY KEY(Order_ID, Bvg_ID),
+CONSTRAINT FK_Include_Order_ID FOREIGN KEY(Order_ID) REFERENCES Orders(Order_ID),
+CONSTRAINT FK_Include_Bvg_ID FOREIGN KEY(Bvg_ID) REFERENCES Beverage(Bvg_ID)
+);
+
+--view all tables--
+SELECT*FROM CUSTOMER;
+SELECT*FROM EMPLOYEE_ATTENDANCE;
+SELECT*FROM EMPLOYEE_POSITION;
+SELECT*FROM SHIFT_SCHEDULE;
+SELECT*FROM EMPLOYEE;
+SELECT*FROM ORDERS;
+--SELECT*FROM FOOD_DELIVERY;--
+SELECT*FROM INCLUDES;
+SELECT*FROM BEVERAGE;
+SELECT*FROM MADE;
+SELECT*FROM INGREDIENT;
+SELECT*FROM INVENTORY;
+SELECT*FROM SUPPLIER;
+
+--PRESENTATION DDL-
+--creating Food_Delivery table--
+CREATE TABLE Food_Delivery (
+Delivery_ID VARCHAR(10) NOT NULL,
+Delivery_Date_Time TIMESTAMP NOT NULL,
+Delivery_Status VARCHAR(10) NOT NULL,
+Platform_Name VARCHAR(20) NOT NULL,
+PRIMARY KEY(Delivery_ID),
+CONSTRAINT check_Delivery_Status CHECK (Delivery_Status IN ('Delivered', 'Cancelled', 'Refunded')),
+CONSTRAINT check_platform_name CHECK (Platform_Name IN ('Grabfood', 'Shopeefood', 'Foodpanda'))
+);
+
+--add constraint to orders table--
+ALTER TABLE Orders
+ADD CONSTRAINT FK_Order_Delivery_ID FOREIGN KEY(Delivery_ID) REFERENCES Food_Delivery(Delivery_ID);
+
+ALTER TABLE Employee
+ADD CONSTRAINT FK_Employee FOREIGN KEY(Employee_Position_ID) 
+REFERENCES Employee_Position(Employee_Position_ID);
+
+--to view supplier_contact data type--
+DESCRIBE SUPPLIER;
+
+ALTER TABLE SUPPLIER
+MODIFY SUPPLIER_CONTACT VARCHAR(15);
+
+--DATA MANIPULATION LANGUAGE--
+INSERT ALL
+INTO Beverage(Bvg_ID, Bvg_Name, Selling_Price, Bvg_Type) VALUES ('M001', 'Panda Milk Tea', 8.9, 'Milk Tea')
+INTO Beverage(Bvg_ID, Bvg_Name, Selling_Price, Bvg_Type) VALUES ('M002', 'Brown Sugar Boba Milk Tea', 10.9, 'Milk Tea')
+INTO Beverage(Bvg_ID, Bvg_Name, Selling_Price, Bvg_Type) VALUES ('F001', 'Passionfruit Tea', 7.9, 'Fruit Tea')
+INTO Beverage(Bvg_ID, Bvg_Name, Selling_Price, Bvg_Type) VALUES ('F002', 'Grapefruit Boba Tea', 8.9, 'Fruit Tea')
+SELECT * FROM DUAL;
+
+INSERT ALL
+INTO Supplier(Supplier_ID, Supplier_Name, Supplier_Contact, Supplier_Email, Supplier_Address)
+VALUES ('S001', 'SweetHarvest', '013-4455667', 'taeyeon@sweetharvest.com', '123 Sugar Lane, Jalan Ipoh')
+INTO Supplier(Supplier_ID, Supplier_Name, Supplier_Contact, Supplier_Email, Supplier_Address)
+VALUES ('S002', 'PureLeaf Teas', '014-9955667', 'minnie@pureleafteas.com', '456 Tea Terrace, Jalan Johor')
+INTO Supplier(Supplier_ID, Supplier_Name, Supplier_Contact, Supplier_Email, Supplier_Address)
+VALUES ('S003', 'BobaDelight Supplies', '011-4455667', '79sana@bobadelight.com', '789 Boba Boulevard, Jalan Melaka')
+SELECT * FROM DUAL;
+
+INSERT ALL
+INTO Ingredient(Ingredient_ID, Ingredient_Name, Supplier_ID, Unit_Cost, Ingredient_Category)
+VALUES ('IG001', 'Sugar', 'S001', 10, 'A')
+INTO Ingredient(Ingredient_ID, Ingredient_Name, Supplier_ID, Unit_Cost, Ingredient_Category)
+VALUES ('IG004', 'Brown Sugar', 'S001', 25, 'B')
+INTO Ingredient(Ingredient_ID, Ingredient_Name, Supplier_ID, Unit_Cost, Ingredient_Category)
+VALUES ('IG002', 'Milk', 'S002', 30, 'C')
+INTO Ingredient(Ingredient_ID, Ingredient_Name, Supplier_ID, Unit_Cost, Ingredient_Category)
+VALUES ('IG005', 'Tea', 'S002', 5, 'D')
+INTO Ingredient(Ingredient_ID, Ingredient_Name, Supplier_ID, Unit_Cost, Ingredient_Category)
+VALUES ('IG003', 'Boba', 'S003', 15, 'E')
+INTO Ingredient(Ingredient_ID, Ingredient_Name, Supplier_ID, Unit_Cost, Ingredient_Category)
+VALUES ('IG006', 'Jelly', 'S003', 12, 'F')
+SELECT * FROM DUAL;
+
+INSERT ALL
+INTO Employee_Position(Employee_Position_ID, Employee_Position_Name, Employee_Pay_Rate)
+VALUES ('P001', 'Tea Master', 14.25)
+INTO Employee_Position(Employee_Position_ID, Employee_Position_Name, Employee_Pay_Rate)
+VALUES ('P002','Tea Blender', 8.50)
+INTO Employee_Position(Employee_Position_ID, Employee_Position_Name, Employee_Pay_Rate)
+VALUES ('P003',	'Tea Packer', 12.00)
+INTO Employee_Position(Employee_Position_ID, Employee_Position_Name, Employee_Pay_Rate)
+VALUES ('P004', 'Tea Quality Control', 10.50)
+INTO Employee_Position(Employee_Position_ID, Employee_Position_Name, Employee_Pay_Rate)
+VALUES ('P005',	'Tea Sales Representative',	13.50)
+SELECT*FROM DUAL;
+
+INSERT ALL
+INTO Customer (Customer_ID, Customer_Name, Customer_Contact, Customer_Email)
+VALUES (230601, 'Ali', '012-3456789', 'aliali@gmail.com')
+INTO Customer (Customer_ID, Customer_Name, Customer_Contact, Customer_Email)
+VALUES (230602, 'Muthu', '019-8765432', 'muthu@gmail.com')
+INTO Customer (Customer_ID, Customer_Name, Customer_Contact, Customer_Email)
+VALUES (230592, 'John', '017-2345678', 'johntan@gmail.com')
+SELECT * FROM DUAL;
+
+INSERT ALL
+INTO Inventory(Inventory_ID, Ingredient_ID, Date_Created, Expiration_Date, Ingredient_Quantity)
+VALUES ('IV001', 'IG001', TO_DATE('25/8/2023', 'DD/MM/YYYY'), TO_DATE('8/2/2024', 'DD/MM/YYYY'), 100)
+INTO Inventory(Inventory_ID, Ingredient_ID, Date_Created, Expiration_Date, Ingredient_Quantity)
+VALUES ('IV002', 'IG002', TO_DATE('25/8/2023', 'DD/MM/YYYY'), TO_DATE('10/12/2023', 'DD/MM/YYYY'), 50)
+INTO Inventory(Inventory_ID, Ingredient_ID, Date_Created, Expiration_Date, Ingredient_Quantity)
+VALUES ('IV003', 'IG004', TO_DATE('4/9/2023', 'DD/MM/YYYY'), TO_DATE('6/3/2024', 'DD/MM/YYYY'), 100)
+INTO Inventory(Inventory_ID, Ingredient_ID, Date_Created, Expiration_Date, Ingredient_Quantity)
+VALUES ('IV004', 'IG002', TO_DATE('15/9/2023', 'DD/MM/YYYY'), TO_DATE('3/1/2024', 'DD/MM/YYYY'), 75)
+INTO Inventory(Inventory_ID, Ingredient_ID, Date_Created, Expiration_Date, Ingredient_Quantity)
+VALUES ('IV005', 'IG001', TO_DATE('18/9/2023', 'DD/MM/YYYY'), TO_DATE('15/3/2024', 'DD/MM/YYYY'), 150)
+INTO Inventory(Inventory_ID, Ingredient_ID, Date_Created, Expiration_Date, Ingredient_Quantity)
+VALUES ('IV006', 'IG003', TO_DATE('8/10/2023', 'DD/MM/YYYY'), TO_DATE('8/3/2024', 'DD/MM/YYYY'), 50)
+INTO Inventory(Inventory_ID, Ingredient_ID, Date_Created, Expiration_Date, Ingredient_Quantity)
+VALUES ('IV007', 'IG005', TO_DATE('12/10/2023', 'DD/MM/YYYY'), TO_DATE('12/10/2024', 'DD/MM/YYYY'), 100)
+INTO Inventory(Inventory_ID, Ingredient_ID, Date_Created, Expiration_Date, Ingredient_Quantity)
+VALUES ('IV008', 'IG001', TO_DATE('5/11/2023', 'DD/MM/YYYY'), TO_DATE('9/4/2024', 'DD/MM/YYYY'), 100)
+INTO Inventory(Inventory_ID, Ingredient_ID, Date_Created, Expiration_Date, Ingredient_Quantity)
+VALUES ('IV009', 'IG006', TO_DATE('6/11/2023', 'DD/MM/YYYY'), TO_DATE('7/3/2024', 'DD/MM/YYYY'), 120)
+INTO Inventory(Inventory_ID, Ingredient_ID, Date_Created, Expiration_Date, Ingredient_Quantity)
+VALUES ('IV010', 'IG002', TO_DATE('20/11/2023', 'DD/MM/YYYY'), TO_DATE('23/2/2024', 'DD/MM/YYYY'), 100)
+SELECT * FROM DUAL;
+
+INSERT ALL
+INTO Made(Bvg_ID, Ingredient_ID)
+VALUES ('M001', 'IG001')
+INTO Made(Bvg_ID, Ingredient_ID)
+VALUES ('M001', 'IG002')
+INTO Made(Bvg_ID, Ingredient_ID)
+VALUES ('M001', 'IG003')
+INTO Made(Bvg_ID, Ingredient_ID)
+VALUES ('M002', 'IG001')
+INTO Made(Bvg_ID, Ingredient_ID)
+VALUES ('M002', 'IG002')
+INTO Made(Bvg_ID, Ingredient_ID)
+VALUES ('M002', 'IG003')
+INTO Made(Bvg_ID, Ingredient_ID)
+VALUES ('M002', 'IG004')
+INTO Made(Bvg_ID, Ingredient_ID)
+VALUES ('F001', 'IG001')
+INTO Made(Bvg_ID, Ingredient_ID)
+VALUES ('F001', 'IG005')
+INTO Made(Bvg_ID, Ingredient_ID)
+VALUES ('F002', 'IG001')
+INTO Made(Bvg_ID, Ingredient_ID)
+VALUES ('F002', 'IG005')
+INTO Made(Bvg_ID, Ingredient_ID)
+VALUES ('F002', 'IG003')
+SELECT * FROM DUAL;
+
+INSERT ALL
+INTO Employee (
+Employee_ID,
+Employee_Name,
+Employee_NRIC,
+Employee_BankDetails,
+Employee_Contact,
+Employee_Gender,
+Employee_Hire_Date,
+Employee_Working_Hours,
+Employee_Position_ID
+)
+VALUES (
+'E001',
+'John Doe',
+'1234567890',
+'60146400236236',
+'60-1155577037',
+'Male',
+TO_DATE('2023-11-04', 'YYYY-MM-DD'),
+45,
+'P001'
+)
+INTO Employee (
+Employee_ID,
+Employee_Name,
+Employee_NRIC,
+Employee_BankDetails,
+Employee_Contact,
+Employee_Gender,
+Employee_Hire_Date,
+Employee_Working_Hours,
+Employee_Position_ID
+)
+VALUES (
+'E004',
+'Sarah Tan',
+'2134567890',
+'60146400236233',
+'60-1155577040',
+'Female',
+TO_DATE('2023-11-09', 'YYYY-MM-DD'),
+30,
+'P004'
+)
+INTO Employee (
+Employee_ID,
+Employee_Name,
+Employee_NRIC,
+Employee_BankDetails,
+Employee_Contact,
+Employee_Gender,
+Employee_Hire_Date,
+Employee_Working_Hours,
+Employee_Position_ID
+)
+VALUES (
+'E005',
+'David Lee',
+'3456789012',
+'60146400236232',
+'60-1155577041',
+'Male',
+TO_DATE('2023-11-10', 'YYYY-MM-DD'),
+40,
+'P005'
+)
+INTO Employee (
+Employee_ID,
+Employee_Name,
+Employee_NRIC,
+Employee_BankDetails,
+Employee_Contact,
+Employee_Gender,
+Employee_Hire_Date,
+Employee_Working_Hours,
+Employee_Position_ID
+)
+VALUES (
+'E007',
+'Mariah Tan',
+'456987236',
+'6046400236230',
+'60-1155577043',
+'Female',
+TO_DATE('2023-11-12', 'YYYY-MM-DD'), 
+20,
+'P003'
+)
+SELECT * FROM DUAL;
+
+INSERT ALL
+INTO Food_Delivery(Delivery_ID, Delivery_Date_Time, Delivery_Status, Platform_Name)
+VALUES ('GF399-102'	,TO_TIMESTAMP('18/11/2023 11.00 AM', 'DD/MM/YYYY HH.MI AM'),'Delivered', 'Grabfood')
+INTO Food_Delivery(Delivery_ID, Delivery_Date_Time, Delivery_Status, Platform_Name)
+VALUES ('FP456-901', TO_TIMESTAMP('16/11/2023 3.40 PM', 'DD/MM/YYYY HH.MI PM'), 'Delivered', 'Foodpanda')
+INTO Food_Delivery(Delivery_ID, Delivery_Date_Time, Delivery_Status, Platform_Name)
+VALUES ('FP487-928', TO_TIMESTAMP('14/11/2023 8.40 PM', 'DD/MM/YYYY HH.MI PM'), 'Delivered', 'Foodpanda')
+SELECT*FROM DUAL;
+
+INSERT ALL
+INTO Orders (
+Order_ID,
+Employee_ID,
+Customer_ID,
+Order_Date_Time,
+Payment_Method_Name,
+Payment_Amount,
+Delivery_ID
+)
+VALUES (
+1001,
+'E001',
+230601,
+TO_DATE('2023-11-19 11:30:00 AM', 'YYYY-MM-DD HH:MI:SS AM'),
+'Cash',
+26.7,
+''
+)
+INTO Orders (
+Order_ID,
+Employee_ID,
+Customer_ID,
+Order_Date_Time,
+Payment_Method_Name,
+Payment_Amount,
+Delivery_ID
+)
+VALUES (
+1002,
+'E001',
+230602,
+TO_DATE('2023-11-18 10:30:00 AM', 'YYYY-MM-DD HH:MI:SS AM'),
+'E-wallet',
+8.9,
+'GF399-102'
+)
+INTO Orders (
+Order_ID,
+Employee_ID,
+Customer_ID,
+Order_Date_Time,
+Payment_Method_Name,
+Payment_Amount,
+Delivery_ID
+)
+VALUES (
+1003,
+'E004',
+230592,
+TO_DATE('2023-11-16 03:00:00 PM', 'YYYY-MM-DD HH:MI:SS PM'),
+'Credit/Debit Card',
+50,
+'FP456-901'
+)
+INTO Orders (
+Order_ID,
+Employee_ID,
+Customer_ID,
+Order_Date_Time,
+Payment_Method_Name,
+Payment_Amount,
+Delivery_ID
+)
+VALUES (
+1004,
+'E004',
+230592,
+TO_DATE('2023-11-14 08:00:00 PM', 'YYYY-MM-DD HH:MI:SS PM'),
+'Credit/Debit Card',
+40,
+'FP487-928'
+)
+SELECT * FROM DUAL;
+
+
+INSERT ALL
+INTO Includes (Order_ID, Bvg_ID, Bvg_Quantity)
+VALUES (1001, 'M001', 2)
+INTO Includes (Order_ID, Bvg_ID, Bvg_Quantity)
+VALUES (1001, 'F002', 1)
+INTO Includes (Order_ID, Bvg_ID, Bvg_Quantity)
+VALUES (1002, 'M001', 1)
+INTO Includes (Order_ID, Bvg_ID, Bvg_Quantity)
+VALUES (1003, 'M001', 3)
+INTO Includes (Order_ID, Bvg_ID, Bvg_Quantity)
+VALUES (1003, 'M002', 2)
+INTO Includes (Order_ID, Bvg_ID, Bvg_Quantity)
+VALUES (1003, 'F001', 2)
+SELECT * FROM DUAL;
+
+INSERT ALL
+INTO Shift_Schedule (
+Shift_ID,
+Employee_ID,
+Shift_Date,
+Shift_Start_Time,
+Shift_End_Time,
+Shift_Type
+)
+VALUES (
+'S001',
+'E001',
+TO_DATE('2023-11-13', 'YYYY-MM-DD'),
+TO_TIMESTAMP('08:00 AM', 'HH:MI AM'),
+TO_TIMESTAMP('05:00 PM', 'HH:MI PM'),
+'Morning Shift'
+)
+INTO Shift_Schedule (
+Shift_ID,
+Employee_ID,
+Shift_Date,
+Shift_Start_Time,
+Shift_End_Time,
+Shift_Type
+)
+VALUES (
+'S002',
+'E004',
+TO_DATE('2023-11-13', 'YYYY-MM-DD'),
+TO_TIMESTAMP('12:00 PM', 'HH:MI PM'),
+TO_TIMESTAMP('09:00 PM', 'HH:MI PM'),
+'Afternoon Shift'
+)
+INTO Shift_Schedule (
+Shift_ID,
+Employee_ID,
+Shift_Date,
+Shift_Start_Time,
+Shift_End_Time,
+Shift_Type
+)
+VALUES (
+'S003',
+'E005',
+TO_DATE('2023-11-13', 'YYYY-MM-DD'),
+TO_TIMESTAMP('10:00 AM', 'HH:MI AM'),
+TO_TIMESTAMP('07:00 PM', 'HH:MI PM'),
+'Day Shift'
+)
+INTO Shift_Schedule (
+Shift_ID,
+Employee_ID,
+Shift_Date,
+Shift_Start_Time,
+Shift_End_Time,
+Shift_Type
+)
+VALUES (
+'S004',
+'E007',
+TO_DATE('2023-11-13', 'YYYY-MM-DD'),
+TO_TIMESTAMP('12:00 PM', 'HH:MI PM'),
+TO_TIMESTAMP('09:00 PM', 'HH:MI PM'),
+'Afternoon Shift'
+)
+INTO Shift_Schedule (
+Shift_ID,
+Employee_ID,
+Shift_Date,
+Shift_Start_Time,
+Shift_End_Time,
+Shift_Type
+)
+VALUES (
+'S005',
+'E001',
+TO_DATE('2023-11-14', 'YYYY-MM-DD'),
+TO_TIMESTAMP('08:00 AM', 'HH:MI AM'),
+TO_TIMESTAMP('05:00 PM', 'HH:MI PM'),
+'Morning Shift'
+)
+SELECT * FROM DUAL;
+
+INSERT ALL
+INTO Employee_Attendance (Employee_ID, Attendance_ID, Attendance_Date, Attendance_Status, Clock_In_Time, Clock_Out_Time)
+VALUES ('E001', 'A001', TO_DATE('2023-11-12', 'YYYY-MM-DD'), 'Present', TO_TIMESTAMP('8:00 am', 'HH:MI am'), TO_TIMESTAMP('5:00 pm', 'HH:MI pm'))
+INTO Employee_Attendance (Employee_ID, Attendance_ID, Attendance_Date, Attendance_Status, Clock_In_Time, Clock_Out_Time)
+VALUES ('E004', 'A002', TO_DATE('2023-11-13', 'YYYY-MM-DD'), 'Present', TO_TIMESTAMP('12:00 pm', 'HH:MI pm'), TO_TIMESTAMP('9:00 pm', 'HH:MI pm'))
+INTO Employee_Attendance (Employee_ID, Attendance_ID, Attendance_Date, Attendance_Status, Clock_In_Time, Clock_Out_Time)
+VALUES ('E005', 'A003', TO_DATE('2023-11-13', 'YYYY-MM-DD'), 'Present', TO_TIMESTAMP('10:00 am', 'HH:MI am'), TO_TIMESTAMP('7:00 pm', 'HH:MI pm'))
+INTO Employee_Attendance (Employee_ID, Attendance_ID, Attendance_Date, Attendance_Status, Clock_In_Time, Clock_Out_Time)
+VALUES ('E007', 'A004', TO_DATE('2023-11-13', 'YYYY-MM-DD'), 'Present', TO_TIMESTAMP('12:00 pm', 'HH:MI pm'), TO_TIMESTAMP('9:00 pm', 'HH:MI pm'))
+INTO Employee_Attendance (Employee_ID, Attendance_ID, Attendance_Date, Attendance_Status, Clock_In_Time, Clock_Out_Time)
+VALUES ('E001', 'A005', TO_DATE('2023-11-14', 'YYYY-MM-DD'), 'Present', TO_TIMESTAMP('8:00 am', 'HH:MI am'), TO_TIMESTAMP('5:00 pm', 'HH:MI pm'))
+SELECT * FROM DUAL;
+
+--PRESENTATION DML--
+--insert new query to Employee_Attendance table--
+
+--Update based on certain conditions--
+UPDATE INGREDIENT
+SET UNIT_COST = 20
+WHERE INGREDIENT_NAME='Boba';
+
+--show updated data--
+SELECT*FROM INGREDIENT;
+
+--Display categorised information using INNER JOIN--
+SELECT Employee.Employee_ID AS EmployeeId,
+Employee.Employee_Working_Hours AS WorkingHours,
+Employee_Attendance.Attendance_Date AS AttendanceDate,
+Employee_Attendance.Attendance_Status AS AttendanceStatus,
+Employee_Attendance.Clock_In_Time AS ClockInTime,
+Employee_Attendance.Clock_Out_Time AS ClockOutTime
+FROM Employee
+INNER JOIN Employee_Attendance
+ON Employee.Employee_ID=Employee_Attendance.Employee_ID
+WHERE Attendance_Status='Present';
+
+
+--BEST SQL STATEMENT--
+--First--
+SELECT
+    Beverage.Bvg_ID,
+    Beverage.Bvg_Name,
+    SUM(Includes.Bvg_Quantity) AS TotalQuantitySold
+FROM
+    Orders
+JOIN
+    Includes ON Orders.Order_ID = Includes.Order_ID
+JOIN
+    Beverage ON Includes.Bvg_ID = Beverage.Bvg_ID
+WHERE
+    EXTRACT(MONTH FROM Orders.Order_Date_Time) = 11 -- Replace with your desired month
+    AND EXTRACT(YEAR FROM Orders.Order_Date_Time) = 2023 -- Replace with your desired year
+GROUP BY
+    Beverage.Bvg_ID, Beverage.Bvg_Name
+ORDER BY
+    TotalQuantitySold DESC;
+    
+--Second--
+SELECT
+    I2.Ingredient_ID,
+    I2.Ingredient_Name,
+    I2.Unit_Cost,
+    S.Supplier_ID,
+    S.Supplier_Name,
+    S.Supplier_Contact,
+    S.Supplier_Email,
+    SUM(I.Ingredient_Quantity) AS TotalStockQuantity
+FROM
+    inventory I
+JOIN
+    ingredient I2 ON I.Ingredient_ID = I2.Ingredient_ID
+JOIN
+    supplier S ON I2.Supplier_ID = S.Supplier_ID
+LEFT JOIN
+    made M ON I.Ingredient_ID = M.Ingredient_ID
+GROUP BY
+    I2.Ingredient_ID, I2.Ingredient_Name, I2.Unit_Cost, S.Supplier_ID, S.Supplier_Name, S.Supplier_Contact, S.Supplier_Email
+ORDER BY
+    I2.Ingredient_ID ASC;
+
+--Third--
+SELECT
+    c.Customer_ID, c.Customer_Name, c.Customer_Contact, c.Customer_Email, 
+    COUNT(o.Order_ID) AS OrderCount
+FROM 
+    customer c
+LEFT JOIN 
+    orders o ON c.Customer_ID = o.Customer_ID
+GROUP BY 
+    c.Customer_ID, c.Customer_Name, c.Customer_Contact, c.Customer_Email;
+    
+--Fourth--
+
+SELECT
+    b.Bvg_Type,
+    SUM(o.Payment_Amount) AS TotalSales
+FROM
+    Orders o
+JOIN
+    Includes i ON o.Order_ID = i.Order_ID
+JOIN
+    Beverage b ON i.Bvg_ID = b.Bvg_ID
+GROUP BY
+    b.Bvg_Type;
