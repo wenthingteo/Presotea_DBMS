@@ -11,7 +11,7 @@ The existing challenges at Presotea SS2 include:
 - Plans to open new branches necessitate a robust database system for efficient data management.
 
 ### Proposed Solution
-To address these challenges, our group aims to develop a robust database management system tailored to the specific needs of Presotea SS2. This system will enable quick and precise access to information, improving operational efficiency and customer satisfaction.
+To address these challenges, our group aims to develop a database management system tailored to the specific needs of Presotea SS2. This system will enable quick and precise access to information, improving operational efficiency and customer satisfaction.
 
 ### Features
 The proposed database management system will include the following features:
@@ -21,4 +21,4 @@ The proposed database management system will include the following features:
 - Scalable architecture to accommodate future expansion plans.
 
 ### Conclusion
-Our collaboration with Presotea SS2 aims to enhance their operational efficiency and customer experience through the implementation of an optimized database management system. By addressing the current challenges and incorporating advanced features, we strive to contribute to the continued success and growth of Presotea in the competitive beverage industry.
+Our collaboration with Presotea SS2 aims to enhance their operational efficiency and customer experience through the implementation of an optimized database management system. 
